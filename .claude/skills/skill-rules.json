@@ -1,0 +1,137 @@
+{
+    "version": "1.0",
+    "description": "Skill activation triggers for Claude Code. Controls when skills automatically suggest or block actions.",
+    "skills": {
+        "skill-developer": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Meta-skill for creating and managing Claude Code skills",
+            "promptTriggers": {
+                "keywords": [
+                    "skill system",
+                    "create skill",
+                    "add skill",
+                    "skill triggers",
+                    "skill rules",
+                    "hook system",
+                    "skill development",
+                    "skill-rules.json"
+                ],
+                "intentPatterns": [
+                    "(how do|how does|explain).*?skill",
+                    "(create|add|modify|build).*?skill",
+                    "skill.*?(work|trigger|activate|system)"
+                ]
+            }
+        },
+        "skill-optimizer": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "medium",
+            "description": "Skill optimization guidance for reducing token usage through progressive disclosure, 500-line rule, content loading optimization, and reference file organization",
+            "promptTriggers": {
+                "keywords": [
+                    "optimize skill",
+                    "skill optimization",
+                    "token usage",
+                    "reduce tokens",
+                    "token efficiency",
+                    "500-line rule",
+                    "500 line rule",
+                    "skill size",
+                    "progressive disclosure",
+                    "content loading",
+                    "reference files",
+                    "REFERENCE.md",
+                    "EXAMPLES.md",
+                    "PATTERNS.md",
+                    "TROUBLESHOOTING.md",
+                    "YAML frontmatter",
+                    "skill frontmatter",
+                    "skill description",
+                    "trigger keywords",
+                    "skill architecture",
+                    "skill structure",
+                    "Level 1 loading",
+                    "Level 2 loading",
+                    "Level 3 loading",
+                    "metadata loading",
+                    "instruction loading",
+                    "resource loading",
+                    "split skill",
+                    "restructure skill",
+                    "skill too large",
+                    "skill performance",
+                    "context consumption",
+                    "skill content",
+                    "extract API docs",
+                    "extract examples",
+                    "extract patterns",
+                    "skill scripts",
+                    "table of contents",
+                    "TOC"
+                ],
+                "intentPatterns": [
+                    "(optimize|improve|reduce).*?(skill|token|context|size|performance)",
+                    "(skill|SKILL.md).*?(too|very).*?(large|big|long)",
+                    "(apply|follow|implement).*?500.?line",
+                    "(restructure|reorganize|split|refactor).*?skill",
+                    "(extract|move|migrate).*?(API|examples?|patterns?|troubleshoot)",
+                    "(create|add).*?(reference|REFERENCE|EXAMPLES|PATTERNS)",
+                    "(progressive|content).*?(disclosure|loading)",
+                    "(optimize|improve|enhance).*?(frontmatter|description|triggers)",
+                    "skill.*?(optimization|efficiency|performance)",
+                    "(reduce|minimize|decrease).*?(token|context|size)",
+                    "(how do|how to).*?(optimize|reduce|split).*?skill",
+                    "skill.*?(Level [123]|loading|architecture)",
+                    "(measure|calculate|estimate).*?(token|size|saving)",
+                    "(table of contents|TOC).*?(skill|reference)"
+                ]
+            },
+            "filePathTriggers": [
+                ".claude/skills/**/SKILL.md",
+                ".claude/skills/**/REFERENCE.md",
+                ".claude/skills/**/EXAMPLES.md",
+                ".claude/skills/**/PATTERNS.md"
+            ]
+        },
+        "frontend-developement": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Meta-skill for creating frontend interfaces and components",
+            "promptTriggers": {
+                "keywords": [
+                    "frontend",
+                    "components",
+                    "page",
+                    "Next.js"
+                ],
+                "intentPatterns": [
+                    "(create|add|modify|build).*?page",
+                    "(create|add|modify|build).*?component",
+                    "(create|add|modify|build).*?frontend"
+                ]
+            }
+        }
+    },
+    "notes": {
+        "enforcement_types": {
+            "suggest": "Skill suggestion appears but doesn't block execution",
+            "block": "Requires skill to be used before proceeding (guardrail)",
+            "warn": "Shows warning but allows proceeding"
+        },
+        "priority_levels": {
+            "critical": "Highest - Always trigger when matched",
+            "high": "Important - Trigger for most matches",
+            "medium": "Moderate - Trigger for clear matches",
+            "low": "Optional - Trigger only for explicit matches"
+        },
+        "customization": {
+            "pathPatterns": "Adjust to match your project structure (blog-api, auth-service, etc.)",
+            "keywords": "Add domain-specific terms relevant to your project",
+            "intentPatterns": "Use regex for flexible user intent matching"
+        }
+    }
+}
