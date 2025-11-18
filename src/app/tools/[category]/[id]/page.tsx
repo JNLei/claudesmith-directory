@@ -391,7 +391,12 @@ export default async function ToolDetailPage({ params }: PageProps) {
               <a href="/blog" className="hover:text-foreground transition-colors">
                 Blog
               </a>
-              <a href="#" className="hover:text-foreground transition-colors">
+              <a
+                href="https://github.com/JNLei/claude-tools.git"
+                className="hover:text-foreground transition-colors"
+                target="_blank"
+                rel="noreferrer"
+              >
                 GitHub
               </a>
             </div>

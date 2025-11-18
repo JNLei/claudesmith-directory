@@ -186,7 +186,12 @@ export default function BlogPostPage() {
               <Link href="/blog" className="hover:text-foreground transition-colors">
                 Blog
               </Link>
-              <a href="#" className="hover:text-foreground transition-colors">
+              <a
+                href="https://github.com/JNLei/claude-tools.git"
+                className="hover:text-foreground transition-colors"
+                target="_blank"
+                rel="noreferrer"
+              >
                 GitHub
               </a>
             </div>
