@@ -1,3 +1,7 @@
 [submodule "tools"]
 	path = tools
 	url = https://github.com/JNLei/claude-tools.git
+[submodule "external-marketplaces/anthropic-skills"]
+	path = external-marketplaces/anthropic-skills
+	url = https://github.com/anthropics/skills.git
+	branch = main
