@@ -179,23 +179,26 @@ async function createSkillTool(
         const skillMdPath = `${skillPath}/SKILL.md`;
         const skillContent = await fetcher.fetchFile(skillMdPath);
 
-        // For GitHub sources, skip listing additional files to avoid API rate limits
-        // Additional files can be loaded on-demand when viewing the tool details
+        // Load additional files dynamically
         const additionalContent: Record<string, string> = {};
 
-        if (marketplace.source.type === 'local') {
-            // Only list additional files for local sources
-            const additionalFiles = await fetcher.listFiles(skillPath, ['.md', '.json', '.txt']);
+        // Get list of files in the skill directory
+        const files = await fetcher.listFiles(skillPath, ['.md', '.json', '.txt']);
 
-            for (const file of additionalFiles) {
-                if (file.endsWith('SKILL.md')) continue;
-                try {
-                    const content = await fetcher.fetchFile(file);
-                    const relativePath = file.replace(`${skillPath}/`, '');
-                    additionalContent[relativePath] = content;
-                } catch {
-                    // Skip files that can't be fetched
-                }
+        for (const file of files) {
+            // Skip the main SKILL.md file
+            const fileName = file.split('/').pop() || '';
+            if (fileName === 'SKILL.md') continue;
+
+            try {
+                const content = await fetcher.fetchFile(file);
+                // Calculate relative path by removing the skillPath prefix
+                // Handle both "./path" and "path" formats
+                const normalizedSkillPath = skillPath.replace(/^\.\//, '');
+                const relativePath = file.replace(new RegExp(`^${normalizedSkillPath}/`), '');
+                additionalContent[relativePath] = content;
+            } catch (error) {
+                console.warn(`Could not fetch file ${file}:`, error);
             }
         }
 
@@ -396,6 +399,28 @@ async function createGenericTool(
             }
         }
 
+        // Load additional files (for plugin bundles)
+        const additionalContent: Record<string, string> = {};
+
+        // Get list of all files in the plugin directory
+        const files = await fetcher.listFiles(pluginSource, ['.md', '.json', '.txt', '.sh']);
+
+        for (const file of files) {
+            // Skip the main file
+            const fileName = file.split('/').pop() || '';
+            if (fileName === mainFile) continue;
+
+            try {
+                const content = await fetcher.fetchFile(file);
+                // Calculate relative path
+                const normalizedPluginSource = pluginSource.replace(/^\.\//, '');
+                const relativePath = file.replace(new RegExp(`^${normalizedPluginSource}/`), '');
+                additionalContent[relativePath] = content;
+            } catch (error) {
+                console.warn(`Could not fetch file ${file}:`, error);
+            }
+        }
+
         return {
             id: pluginName,
             name: pluginName.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
@@ -409,11 +434,15 @@ async function createGenericTool(
             lastUpdated: new Date().toISOString(),
             files: {
                 main: mainFile,
-                additional: undefined
+                additional: Object.keys(additionalContent).length > 0
+                    ? Object.keys(additionalContent)
+                    : undefined
             },
             content: {
                 main: mainContent,
-                additional: undefined
+                additional: Object.keys(additionalContent).length > 0
+                    ? additionalContent
+                    : undefined
             },
             installation: {
                 targetDir: `.claude/${category}/${pluginName}`,

@@ -23,7 +23,8 @@ export class LocalFetcher implements MarketplaceFetcher {
 
     async listFiles(dirPath: string, extensions?: string[]): Promise<string[]> {
         const fullPath = path.join(process.cwd(), this.basePath, dirPath);
-        return this._listFilesRecursive(fullPath, extensions, fullPath);
+        const basePathFull = path.join(process.cwd(), this.basePath);
+        return this._listFilesRecursive(fullPath, extensions, basePathFull);
     }
 
     private async _listFilesRecursive(

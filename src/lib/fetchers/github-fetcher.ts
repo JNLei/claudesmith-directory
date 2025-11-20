@@ -56,49 +56,17 @@ export class GitHubFetcher implements MarketplaceFetcher {
     }
 
     /**
-   * List files in a directory using GitHub API with unstable_cache
-   * Note: This is expensive for GitHub API. Use sparingly.
+   * List files in a directory using GitHub Contents API
+   * Recursively lists all files including subdirectories
+   * Uses GITHUB_TOKEN env var for authentication (5,000 requests/hour vs 60/hour)
    */
     async listFiles(dirPath: string, extensions?: string[]): Promise<string[]> {
-        // For skills, we typically only need SKILL.md and a few extra files
-        // Try common file patterns first to avoid expensive tree traversal
-        const commonFiles = ['SKILL.md', 'README.md', 'LICENSE.txt', 'templates/'];
-        const foundFiles: string[] = [];
-
-        for (const file of commonFiles) {
-            const filePath = `${dirPath}/${file}`;
-            try {
-                await this.fetchFile(filePath);
-                if (!extensions || extensions.some(ext => file.endsWith(ext))) {
-                    foundFiles.push(filePath);
-                }
-            } catch {
-                // File doesn't exist, skip
-            }
-        }
-
-        // If we found files, return them without expensive tree traversal
-        if (foundFiles.length > 0) {
-            return foundFiles;
-        }
-
-        // Fallback: use cached recursive listing only if needed
-        const listFilesCached = unstable_cache(
-            async (dir: string, exts?: string[]) => {
-                return this._listFilesRecursive(dir, exts);
-            },
-            [`list-files-${this.config.owner}-${this.config.repo}-${dirPath}-${extensions?.join(',') || 'all'}`],
-            {
-                revalidate: this.cacheRevalidate,
-                tags: [`github:${this.config.owner}/${this.config.repo}:tree`]
-            }
-        );
-
-        return listFilesCached(dirPath, extensions);
+        return this._listFilesRecursive(dirPath, extensions);
     }
 
     /**
-     * Internal recursive file listing using GitHub API
+     * List files recursively using GitHub Contents API
+     * Each API call is cached by Next.js fetch
      */
     private async _listFilesRecursive(
         dirPath: string,
@@ -110,7 +78,6 @@ export class GitHubFetcher implements MarketplaceFetcher {
         const response = await fetch(url, {
             headers: {
                 'Accept': 'application/vnd.github.v3+json',
-                // Add GITHUB_TOKEN if available (optional)
                 ...(process.env.GITHUB_TOKEN && {
                     'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`
                 })
@@ -128,7 +95,7 @@ export class GitHubFetcher implements MarketplaceFetcher {
 
         const items = await response.json();
 
-        // Handle case where items is not an array (single file)
+        // Handle case where response is not an array (single file or error)
         if (!Array.isArray(items)) {
             return [];
         }
@@ -137,6 +104,7 @@ export class GitHubFetcher implements MarketplaceFetcher {
 
         for (const item of items) {
             if (item.type === 'file') {
+                // Check extension filter
                 if (!extensions || extensions.some(ext => item.name.endsWith(ext))) {
                     files.push(item.path);
                 }
