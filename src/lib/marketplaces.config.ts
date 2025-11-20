@@ -24,12 +24,9 @@ export const MARKETPLACES: MarketplaceConfig[] = [
         id: 'anthropic-skills',
         name: 'Anthropic Skills',
         source: {
-            type: 'github',
-            owner: 'anthropics',
-            repo: 'skills',
-            branch: 'main'
+            type: 'local',
+            path: './external-marketplaces/anthropic-skills'
         },
         enabled: true,
-        cacheRevalidate: 3600, // 1 hour
     },
 ];
