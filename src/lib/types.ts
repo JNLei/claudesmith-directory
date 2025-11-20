@@ -51,6 +51,10 @@ export interface ToolWithContent extends Tool {
     stars?: number;
     forks?: number;
   };
+  marketplace: {
+    id: string;
+    name: string;
+  };
   // Hook-specific fields (only present for hooks)
   hookConfig?: HookConfig;
   settingsJson?: Record<string, any>; // Ready-to-use settings.json configuration
