@@ -88,6 +88,9 @@ export default {
           '66%': { transform: 'translate(2px, -2px)' },
         },
       },
+      fontFamily: {
+        mono: ['"Fira Code"', 'monospace'],
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

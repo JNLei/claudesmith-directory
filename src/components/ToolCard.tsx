@@ -55,17 +55,7 @@ export default function ToolCard({ tool }: ToolCardProps) {
           )}
         </div>
 
-        {/* Stats */}
         <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2">
-          <div className="flex items-center gap-1">
-            <Download className="w-3 h-3" />
-            <span>
-              {tool.downloads >= 1000
-                ? `${(tool.downloads / 1000).toFixed(1)}k`
-                : tool.downloads}
-            </span>
-          </div>
-          <span>•</span>
           <span>{tool.author}</span>
           <span>•</span>
           <span>{new Date(tool.lastUpdated).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>

@@ -4,11 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "prebuild": "tsx scripts/sync-tools.ts",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "sync-tools": "tsx scripts/sync-tools.ts"
+    "lint": "next lint"
   },
   "dependencies": {
     "@radix-ui/react-separator": "^1.1.8",
