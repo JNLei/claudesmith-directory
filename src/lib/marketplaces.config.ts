@@ -29,4 +29,14 @@ export const MARKETPLACES: MarketplaceConfig[] = [
         },
         enabled: true,
     },
+    {
+        id: 'third-party-marketplace',
+        name: 'Third-Party Plugins',
+        source: {
+            type: 'local',
+            path: './third-party'
+        },
+        enabled: true,
+        cacheRevalidate: 14400, // 4 hours - third-party content changes less frequently
+    },
 ];

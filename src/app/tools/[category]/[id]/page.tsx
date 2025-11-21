@@ -330,11 +330,13 @@ export default async function ToolDetailPage({ params }: PageProps) {
   );
 }
 
-// Generate static params for all tools
+// Generate static params for all tools except third-party (fetched dynamically)
 export async function generateStaticParams() {
   const tools = await loadTools();
-  return tools.map((tool) => ({
-    category: tool.category,
-    id: tool.id,
-  }));
+  return tools
+    .filter((tool) => tool.marketplace.id !== 'third-party-marketplace')
+    .map((tool) => ({
+      category: tool.category,
+      id: tool.id,
+    }));
 }

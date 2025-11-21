@@ -85,14 +85,32 @@ async function loadPlugin(
 
     const tools: ToolWithContent[] = [];
 
+    // Detect GitHub source and create dynamic fetcher
+    let pluginSource: string;
+    let actualFetcher = fetcher;
+
+    if (plugin.source?.source === 'github') {
+        // Third-party plugin with GitHub source
+        const [owner, repo] = plugin.source.repo.split('/');
+        actualFetcher = new GitHubFetcher({
+            owner,
+            repo,
+            branch: plugin.source.branch || 'main',
+            cacheRevalidate: marketplace.cacheRevalidate || 3600
+        });
+        pluginSource = './'; // Fetch from root of plugin's GitHub repo
+    } else {
+        // Local or marketplace-level GitHub source
+        pluginSource = typeof plugin.source === 'string' ? plugin.source : plugin.source?.path || './';
+    }
+
     // Get plugin metadata (if strict mode and relative path source)
     let pluginMetadata = null;
-    const pluginSource = typeof plugin.source === 'string' ? plugin.source : plugin.source?.path || './';
 
     if (plugin.strict !== false) {
         try {
             const pluginJsonPath = `${pluginSource}/.claude-plugin/plugin.json`;
-            const content = await fetcher.fetchFile(pluginJsonPath);
+            const content = await actualFetcher.fetchFile(pluginJsonPath);
             pluginMetadata = JSON.parse(content);
         } catch {
             // No plugin.json
@@ -106,7 +124,7 @@ async function loadPlugin(
                 skillPath,
                 plugin,
                 pluginMetadata,
-                fetcher,
+                actualFetcher,
                 marketplace,
                 marketplaceData
             );
@@ -121,7 +139,7 @@ async function loadPlugin(
                 commandPath,
                 plugin,
                 pluginMetadata,
-                fetcher,
+                actualFetcher,
                 marketplace,
                 marketplaceData
             );
@@ -136,7 +154,7 @@ async function loadPlugin(
                 agentPath,
                 plugin,
                 pluginMetadata,
-                fetcher,
+                actualFetcher,
                 marketplace,
                 marketplaceData
             );
@@ -150,7 +168,7 @@ async function loadPlugin(
             pluginSource,
             plugin,
             pluginMetadata,
-            fetcher,
+            actualFetcher,
             marketplace,
             marketplaceData
         );
@@ -227,7 +245,9 @@ async function createSkillTool(
             },
             installation: {
                 targetDir: `.claude/skills/${skillName}`,
-                instructions: marketplace.source.type === 'github'
+                instructions: plugin.source?.source === 'github'
+                    ? `claude skill add https://github.com/${plugin.source.repo}`
+                    : marketplace.source.type === 'github'
                     ? `claude skill add https://github.com/${marketplace.source.owner}/${marketplace.source.repo}/tree/${marketplace.source.branch || 'main'}/${skillPath}`
                     : undefined
             },
@@ -446,7 +466,9 @@ async function createGenericTool(
             },
             installation: {
                 targetDir: `.claude/${category}/${pluginName}`,
-                instructions: plugin.installation?.instructions
+                instructions: plugin.source?.source === 'github'
+                    ? `claude ${category === 'skills' ? 'skill' : category === 'agents' ? 'agent' : 'plugin'} add https://github.com/${plugin.source.repo}`
+                    : plugin.installation?.instructions
             },
             repository: {
                 url: fetcher.getPluginUrl(pluginSource)
