@@ -33,6 +33,22 @@ export interface HookSetup {
   description?: string; // Description of what the setup script does
 }
 
+export interface InstallationStep {
+  content: string; // Full markdown content for the step
+  file?: string; // Optional: path to a file from repo to display after the content
+}
+
+export interface ToolInstallation {
+  // For marketplace plugins
+  targetDir?: string; // Some categories (e.g., MCP) may only provide an install command
+  instructions?: string;
+  
+  // For non-plugin tools
+  isNonPlugin?: boolean;
+  prerequisites?: InstallationStep[];
+  steps?: InstallationStep[];
+}
+
 export interface ToolWithContent extends Tool {
   files?: {
     main: string;
@@ -42,10 +58,7 @@ export interface ToolWithContent extends Tool {
     main: string;
     additional?: Record<string, string>;
   };
-  installation: {
-    targetDir?: string; // Some categories (e.g., MCP) may only provide an install command
-    instructions?: string;
-  };
+  installation: ToolInstallation;
   repository?: {
     url?: string;
     stars?: number;

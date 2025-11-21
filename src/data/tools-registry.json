@@ -1,0 +1,36 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-11-21T00:00:00Z",
+  "tools": [
+    {
+      "id": "ab-method",
+      "name": "AB Method",
+      "category": "commands",
+      "description": "Simple command to add AB method workflow to Claude Code",
+      "author": "ayoubben18",
+      "version": "1.0.0",
+      "tags": ["workflow", "method", "productivity"],
+      "lastUpdated": "2025-11-21T00:00:00Z",
+      "repository": {
+        "type": "github",
+        "url": "https://github.com/ayoubben18/ab-method",
+        "owner": "ayoubben18",
+        "repo": "ab-method",
+        "branch": "main"
+      },
+      "installation": {
+        "steps": [
+          {
+            "content": "Run this command in your terminal to install the AB Method workflow:\n\n```bash\ncurl -fsSL https://raw.githubusercontent.com/ayoubben18/ab-method/refs/heads/main/install.sh | bash\n```\n\nThis will automatically set up the AB Method in your `.claude` directory."
+          }
+        ]
+      },
+      "files": {
+        "include": ["README.md", "install.sh", ".claude/**/*"],
+        "exclude": [".git/**"]
+      }
+    }
+  ]
+}
+
+

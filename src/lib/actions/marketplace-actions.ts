@@ -2,20 +2,24 @@
 
 import { unstable_cache } from 'next/cache';
 import path from 'path';
+import fs from 'fs/promises';
 import { MARKETPLACES, MarketplaceConfig } from '../marketplaces.config';
 import { GitHubFetcher } from '../fetchers/github-fetcher';
 import { LocalFetcher } from '../fetchers/local-fetcher';
+import { NonPluginToolFetcher } from '../fetchers/non-plugin-fetcher';
 import { ToolWithContent } from '../types';
 import type { MarketplaceFetcher } from '../fetchers/marketplace-fetcher.interface';
+import type { NonPluginTool, ToolsRegistry } from '../schemas/tools-registry.schema';
 
 /**
- * Load all tools from all enabled marketplaces
+ * Load all tools from all enabled marketplaces and non-plugin registry
  * Cached with Next.js unstable_cache
  */
 export const loadAllTools = unstable_cache(
     async (): Promise<ToolWithContent[]> => {
         const allTools: ToolWithContent[] = [];
 
+        // Load marketplace plugins
         for (const marketplace of MARKETPLACES) {
             if (!marketplace.enabled) continue;
 
@@ -28,12 +32,21 @@ export const loadAllTools = unstable_cache(
             }
         }
 
+        // Load non-plugin tools from registry
+        try {
+            const nonPluginTools = await loadNonPluginTools();
+            allTools.push(...nonPluginTools);
+            console.log(`✓ Loaded ${nonPluginTools.length} non-plugin tools`);
+        } catch (error) {
+            console.error(`✗ Failed to load non-plugin tools:`, error);
+        }
+
         return allTools;
     },
-    ['all-marketplace-tools'],
+    ['all-tools'],
     {
         revalidate: 3600, // Revalidate every hour
-        tags: ['marketplace-tools']
+        tags: ['all-tools']
     }
 );
 
@@ -482,4 +495,107 @@ async function createGenericTool(
         console.warn(`Failed to load generic plugin: ${plugin.name}`, error);
         return null;
     }
+}
+
+/**
+ * Load tools from non-plugin registry (tools with custom installation)
+ */
+async function loadNonPluginTools(): Promise<ToolWithContent[]> {
+    const registryPath = path.join(process.cwd(), 'src/data/tools-registry.json');
+    
+    let registry: ToolsRegistry;
+    try {
+        const content = await fs.readFile(registryPath, 'utf-8');
+        registry = JSON.parse(content);
+    } catch (error) {
+        console.warn('Could not load tools-registry.json:', error);
+        return [];
+    }
+
+    const tools: ToolWithContent[] = [];
+
+    for (const tool of registry.tools) {
+        try {
+            const toolWithContent = await loadNonPluginTool(tool);
+            if (toolWithContent) {
+                tools.push(toolWithContent);
+            }
+        } catch (error) {
+            console.warn(`Failed to load non-plugin tool: ${tool.id}`, error);
+        }
+    }
+
+    return tools;
+}
+
+/**
+ * Load a single non-plugin tool
+ */
+async function loadNonPluginTool(tool: NonPluginTool): Promise<ToolWithContent | null> {
+    // Only support GitHub for now
+    if (tool.repository.type !== 'github' || !tool.repository.owner || !tool.repository.repo) {
+        console.warn(`Non-plugin tool ${tool.id} requires GitHub repository info`);
+        return null;
+    }
+
+    const fetcher = new NonPluginToolFetcher({
+        owner: tool.repository.owner,
+        repo: tool.repository.repo,
+        branch: tool.repository.branch || 'main'
+    });
+
+    // Fetch files specified in tool config
+    const files = await fetcher.fetchToolFiles(tool);
+
+    // Extract main file (prefer README.md)
+    let mainFile = 'README.md';
+    let mainContent = files['README.md'] || '';
+    
+    // If no README, use first file
+    if (!mainContent && Object.keys(files).length > 0) {
+        mainFile = Object.keys(files)[0];
+        mainContent = files[mainFile];
+    }
+
+    // Prepare additional files (exclude main)
+    const additionalFiles = { ...files };
+    delete additionalFiles[mainFile];
+
+    return {
+        id: tool.id,
+        name: tool.name,
+        category: tool.category,
+        description: tool.description,
+        author: tool.author,
+        version: tool.version,
+        tags: tool.tags,
+        downloads: 0,
+        rating: 5,
+        lastUpdated: tool.lastUpdated,
+        featured: tool.featured,
+        files: {
+            main: mainFile,
+            additional: Object.keys(additionalFiles).length > 0 
+                ? Object.keys(additionalFiles) 
+                : undefined
+        },
+        content: {
+            main: mainContent,
+            additional: Object.keys(additionalFiles).length > 0 
+                ? additionalFiles 
+                : undefined
+        },
+        installation: {
+            isNonPlugin: true,
+            prerequisites: tool.installation.prerequisites,
+            steps: tool.installation.steps
+        },
+        repository: {
+            url: tool.repository.url
+        },
+        marketplace: {
+            id: 'non-plugin-registry',
+            name: 'Community Tools'
+        }
+    };
 }

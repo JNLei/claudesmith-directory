@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { CopyButton } from '@/components/CopyButton';
 import Header from '@/components/Header';
 import { FileTree } from '@/components/FileTree';
+import { FlexibleInstallation } from '@/components/FlexibleInstallation';
 
 interface PageProps {
   params: Promise<{
@@ -46,133 +47,6 @@ export default async function ToolDetailPage({ params }: PageProps) {
         <CopyButton content={content} label="Copy" />
       </div>
     </Card>
-  );
-
-  const projectSettingsJson = JSON.stringify(
-    {
-      marketplaces: [
-        "https://github.com/JNLei/claude-tools.git"
-      ],
-      plugins: [
-        `${tool.id}@claude-tools`
-      ]
-    },
-    null,
-    2
-  );
-
-  const installationSection = (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Installation</h2>
-      </div>
-
-      {/* Project Level (Priority) */}
-      <Card>
-        <details className="group" open>
-          <summary className="flex items-center justify-between cursor-pointer p-6 hover:bg-muted/50 transition-colors rounded-t-lg select-none">
-            <h3 className="text-lg font-medium">Project Level (Recommended)</h3>
-            <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180 text-muted-foreground" />
-          </summary>
-          <CardContent className="p-6 pt-2">
-            <div className="relative pl-8 border-l border-border ml-3 space-y-8 py-2">
-              {/* Step 1 */}
-              <div className="relative">
-                <span className="absolute -left-[41px] top-0 flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium ring-4 ring-card text-muted-foreground">1</span>
-                <div className="space-y-3">
-                  <p className="text-sm font-medium leading-none text-foreground">Create the .claude directory at your project root</p>
-                  <div className="flex items-center gap-2 group/code">
-                    <code className="flex-1 px-4 py-3 bg-muted/50 rounded-lg text-sm font-mono border border-border/50 text-foreground/90">mkdir -p .claude</code>
-                    <CopyButton content="mkdir -p .claude" label="Copy" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 2 */}
-              <div className="relative">
-                <span className="absolute -left-[41px] top-0 flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium ring-4 ring-card text-muted-foreground">2</span>
-                <div className="space-y-3">
-                  <p className="text-sm font-medium leading-none text-foreground">Create settings.json</p>
-                  <div className="flex items-center gap-2 group/code">
-                    <code className="flex-1 px-4 py-3 bg-muted/50 rounded-lg text-sm font-mono border border-border/50 text-foreground/90">touch .claude/settings.json</code>
-                    <CopyButton content="touch .claude/settings.json" label="Copy" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 3 */}
-              <div className="relative">
-                <span className="absolute -left-[41px] top-0 flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium ring-4 ring-card text-muted-foreground">3</span>
-                <div className="space-y-3">
-                  <p className="text-sm font-medium leading-none text-foreground">Add to .claude/settings.json</p>
-                  <div className="flex items-start gap-2 group/code">
-                    <pre className="flex-1 p-4 bg-muted/50 rounded-lg overflow-x-auto text-xs font-mono leading-relaxed border border-border/50 text-foreground/90">
-                      {projectSettingsJson}
-                    </pre>
-                    <CopyButton content={projectSettingsJson} label="Copy" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </details>
-      </Card>
-
-      {/* Global Level */}
-      <Card>
-        <details className="group">
-          <summary className="flex items-center justify-between cursor-pointer p-6 hover:bg-muted/50 transition-colors rounded-t-lg select-none">
-            <h3 className="text-lg font-medium">Global Level</h3>
-            <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180 text-muted-foreground" />
-          </summary>
-          <CardContent className="p-6 pt-2">
-            <div className="relative pl-8 border-l border-border ml-3 space-y-8 py-2">
-              {/* Step 1 */}
-              <div className="relative">
-                <span className="absolute -left-[41px] top-0 flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium ring-4 ring-card text-muted-foreground">1</span>
-                <div className="space-y-3">
-                  <p className="text-sm font-medium leading-none text-foreground">Open Claude</p>
-                </div>
-              </div>
-
-              {/* Step 2 */}
-              <div className="relative">
-                <span className="absolute -left-[41px] top-0 flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium ring-4 ring-card text-muted-foreground">2</span>
-                <div className="space-y-3">
-                  <p className="text-sm font-medium leading-none text-foreground">Add or update marketplace</p>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 group/code">
-                      <code className="flex-1 px-4 py-3 bg-muted/50 rounded-lg text-sm font-mono border border-border/50 text-foreground/90">/plugin marketplace add JNLei/claude-tools</code>
-                      <CopyButton content="/plugin marketplace add JNLei/claude-tools" label="Copy" />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">Or if already added:</span>
-                      <div className="h-px bg-border flex-1" />
-                    </div>
-                    <div className="flex items-center gap-2 group/code">
-                      <code className="flex-1 px-4 py-3 bg-muted/50 rounded-lg text-sm font-mono border border-border/50 text-foreground/90">/plugin marketplace update claude-tools</code>
-                      <CopyButton content="/plugin marketplace update claude-tools" label="Copy" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 3 */}
-              <div className="relative">
-                <span className="absolute -left-[41px] top-0 flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium ring-4 ring-card text-muted-foreground">3</span>
-                <div className="space-y-3">
-                  <p className="text-sm font-medium leading-none text-foreground">Install plugin</p>
-                  <div className="flex items-center gap-2 group/code">
-                    <code className="flex-1 px-4 py-3 bg-muted/50 rounded-lg text-sm font-mono border border-border/50 text-foreground/90">{`/plugin install ${tool.id}@claude-tools`}</code>
-                    <CopyButton content={`/plugin install ${tool.id}@claude-tools`} label="Copy" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </details>
-      </Card>
-    </div>
   );
 
   return (
@@ -247,8 +121,10 @@ export default async function ToolDetailPage({ params }: PageProps) {
 
         <Separator className="my-8" />
 
-        {tool.category === 'mcp' ? (
-          <div>{installationSection}</div>
+        {tool.category === 'mcp' || tool.installation.isNonPlugin ? (
+          <div>
+            <FlexibleInstallation tool={tool} />
+          </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-4">
@@ -272,7 +148,7 @@ export default async function ToolDetailPage({ params }: PageProps) {
             </div>
 
             <div className="lg:pl-4">
-              {installationSection}
+              <FlexibleInstallation tool={tool} />
             </div>
           </div>
         )}
@@ -330,11 +206,14 @@ export default async function ToolDetailPage({ params }: PageProps) {
   );
 }
 
-// Generate static params for all tools except third-party (fetched dynamically)
+// Generate static params for all tools except third-party and non-plugin (fetched dynamically)
 export async function generateStaticParams() {
   const tools = await loadTools();
   return tools
-    .filter((tool) => tool.marketplace.id !== 'third-party-marketplace')
+    .filter((tool) => 
+      tool.marketplace.id !== 'third-party-plugins' && 
+      tool.marketplace.id !== 'non-plugin-registry'
+    )
     .map((tool) => ({
       category: tool.category,
       id: tool.id,

@@ -38,3 +38,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.claude/tsc-cache
+
+# Legacy submodule directories (now using dynamic GitHub fetching)
+/tools
+/external-marketplaces
+/third-party
