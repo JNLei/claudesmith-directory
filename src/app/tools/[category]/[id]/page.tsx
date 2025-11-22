@@ -222,15 +222,15 @@ export default async function ToolDetailPage({ params }: PageProps) {
 }
 
 // Generate static params for all tools except third-party and non-plugin (fetched dynamically)
-export async function generateStaticParams() {
-  const tools = await loadTools();
-  return tools
-    .filter((tool) => 
-      tool.marketplace.id !== 'third-party-plugins' && 
-      tool.marketplace.id !== 'non-plugin-registry'
-    )
-    .map((tool) => ({
-      category: tool.category,
-      id: tool.id,
-    }));
-}
+// export async function generateStaticParams() {
+//   const tools = await loadTools();
+//   return tools
+//     .filter((tool) => 
+//       tool.marketplace.id !== 'third-party-plugins' && 
+//       tool.marketplace.id !== 'non-plugin-registry'
+//     )
+//     .map((tool) => ({
+//       category: tool.category,
+//       id: tool.id,
+//     }));
+// }
