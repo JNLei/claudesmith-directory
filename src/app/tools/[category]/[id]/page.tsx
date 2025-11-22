@@ -50,17 +50,6 @@ async function ToolFilesSection({ category, id }: { category: string; id: string
   );
 }
 
-// Server component for streaming installation section
-async function ToolInstallationSection({ category, id }: { category: string; id: string }) {
-  const tool = await loadTool(category, id);
-
-  if (!tool) {
-    return null;
-  }
-
-  return <FlexibleInstallation tool={tool} />;
-}
-
 // Loading fallback components
 function FilesLoadingSkeleton() {
   return (
@@ -76,17 +65,6 @@ function FilesLoadingSkeleton() {
         </div>
       </Card>
     </div>
-  );
-}
-
-function InstallationLoadingSkeleton() {
-  return (
-    <Card className="p-8">
-      <div className="flex items-center justify-center gap-3 text-muted-foreground">
-        <Loader2 className="h-5 w-5 animate-spin" />
-        <span>Loading installation instructions...</span>
-      </div>
-    </Card>
   );
 }
 
@@ -175,9 +153,7 @@ export default async function ToolDetailPage({ params }: PageProps) {
 
         {toolMetadata.category === 'mcp' ? (
           <div>
-            <Suspense fallback={<InstallationLoadingSkeleton />}>
-              <ToolInstallationSection category={category} id={id} />
-            </Suspense>
+            <FlexibleInstallation tool={toolMetadata} />
           </div>
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">
@@ -186,9 +162,7 @@ export default async function ToolDetailPage({ params }: PageProps) {
             </Suspense>
 
             <div className="lg:pl-4">
-              <Suspense fallback={<InstallationLoadingSkeleton />}>
-                <ToolInstallationSection category={category} id={id} />
-              </Suspense>
+              <FlexibleInstallation tool={toolMetadata} />
             </div>
           </div>
         )}

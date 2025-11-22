@@ -1,6 +1,6 @@
 'use client';
 
-import { ToolWithContent } from '@/lib/types';
+import { ToolWithInstallation } from '@/lib/types';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { CopyButton } from '@/components/CopyButton';
 import ReactMarkdown from 'react-markdown';
@@ -8,27 +8,30 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface FlexibleInstallationProps {
-  tool: ToolWithContent;
+  tool: ToolWithInstallation;
 }
 
 export function FlexibleInstallation({ tool }: FlexibleInstallationProps) {
-  // Check if it's a plugin or non-plugin tool
-  const isNonPlugin = tool.installation.isNonPlugin;
-  
+  // Check if it's a non-plugin tool (has custom installation steps)
+  const isNonPlugin = tool.installation?.isNonPlugin;
+
   if (isNonPlugin) {
     return <NonPluginInstallation tool={tool} />;
   }
-  
+
+  // Default to plugin installation (works for all marketplace plugins)
   return <PluginInstallation tool={tool} />;
 }
 
-function NonPluginInstallation({ tool }: { tool: ToolWithContent }) {
+function NonPluginInstallation({ tool }: { tool: ToolWithInstallation }) {
   const { installation } = tool;
+
+  if (!installation) return null;
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">Installation</h2>
-      
+
       {installation.prerequisites && installation.prerequisites.length > 0 && (
         <Card>
           <CardHeader>
@@ -36,9 +39,9 @@ function NonPluginInstallation({ tool }: { tool: ToolWithContent }) {
           </CardHeader>
           <CardContent className="space-y-6">
             {installation.prerequisites.map((step, idx) => (
-              <InstallationStep 
-                key={idx} 
-                step={step} 
+              <InstallationStep
+                key={idx}
+                step={step}
                 index={idx + 1}
                 showStepNumber={installation.prerequisites!.length > 1}
               />
@@ -46,20 +49,20 @@ function NonPluginInstallation({ tool }: { tool: ToolWithContent }) {
           </CardContent>
         </Card>
       )}
-      
+
       <Card>
         <CardHeader>
           <h3 className="text-lg font-medium">
-            {installation.steps && installation.steps.length === 1 
-              ? 'Installation' 
+            {installation.steps && installation.steps.length === 1
+              ? 'Installation'
               : 'Installation Steps'}
           </h3>
         </CardHeader>
         <CardContent className="space-y-6">
           {installation.steps?.map((step, idx) => (
-            <InstallationStep 
-              key={idx} 
-              step={step} 
+            <InstallationStep
+              key={idx}
+              step={step}
               index={idx + 1}
               showStepNumber={installation.steps!.length > 1}
             />
@@ -134,7 +137,7 @@ function InstallationStep({ step, index, showStepNumber }: InstallationStepProps
   );
 }
 
-function PluginInstallation({ tool }: { tool: ToolWithContent }) {
+function PluginInstallation({ tool }: { tool: ToolWithInstallation }) {
   // Marketplace-based plugin installation (existing implementation)
   const projectSettingsJson = JSON.stringify(
     {

@@ -8,7 +8,7 @@ import { MARKETPLACES, MarketplaceConfig } from '../marketplaces.config';
 import { GitHubFetcher } from '../fetchers/github-fetcher';
 import { LocalFetcher } from '../fetchers/local-fetcher';
 import { NonPluginToolFetcher } from '../fetchers/non-plugin-fetcher';
-import { Tool, ToolWithContent, ToolCategory } from '../types';
+import { ToolWithContent, ToolWithInstallation, ToolCategory } from '../types';
 import type { MarketplaceFetcher } from '../fetchers/marketplace-fetcher.interface';
 import type { NonPluginTool, ToolsRegistry } from '../schemas/tools-registry.schema';
 
@@ -54,11 +54,11 @@ export const loadAllTools = unstable_cache(
 
 /**
  * OPTIMIZED: Load only metadata for all tools (without fetching file contents)
- * This is used for the listing page
+ * This is used for the listing page and includes installation data
  */
 export const loadAllToolsMetadata = unstable_cache(
-    async (): Promise<Tool[]> => {
-        const allTools: Tool[] = [];
+    async (): Promise<ToolWithInstallation[]> => {
+        const allTools: ToolWithInstallation[] = [];
 
         // Load marketplace plugins metadata
         for (const marketplace of MARKETPLACES) {
@@ -175,10 +175,11 @@ async function loadMarketplaceTools(
 
 /**
  * OPTIMIZED: Load only metadata from a marketplace (no file fetching)
+ * Includes installation data which doesn't require fetching files
  */
 async function loadMarketplaceMetadata(
     marketplace: MarketplaceConfig
-): Promise<Tool[]> {
+): Promise<ToolWithInstallation[]> {
     // Create appropriate fetcher
     const fetcher = marketplace.source.type === 'local'
         ? new LocalFetcher(marketplace.source.path)
@@ -193,7 +194,7 @@ async function loadMarketplaceMetadata(
     const marketplaceData = await fetcher.fetchMarketplace();
 
     // Extract metadata from each plugin
-    const tools: Tool[] = [];
+    const tools: ToolWithInstallation[] = [];
 
     for (const plugin of marketplaceData.plugins) {
         const pluginMetadata = extractPluginMetadata(plugin, marketplace, marketplaceData);
@@ -236,13 +237,14 @@ async function loadSingleTool(
 
 /**
  * Extract metadata from a plugin definition (without fetching files)
+ * Includes installation data which can be constructed from metadata
  */
 function extractPluginMetadata(
     plugin: any,
     marketplace: MarketplaceConfig,
     marketplaceData: any
-): Tool[] {
-    const tools: Tool[] = [];
+): ToolWithInstallation[] {
+    const tools: ToolWithInstallation[] = [];
     
     // Generate repository URL helper
     const getRepositoryUrl = (itemPath?: string): string | undefined => {
@@ -281,7 +283,7 @@ function extractPluginMetadata(
             const skillName = skillPath.split('/').pop() || skillPath;
             tools.push({
                 id: skillName,
-                name: skillName.split('-').map((w: string) => 
+                name: skillName.split('-').map((w: string) =>
                     w.charAt(0).toUpperCase() + w.slice(1)
                 ).join(' '),
                 category: 'skills' as ToolCategory,
@@ -290,6 +292,14 @@ function extractPluginMetadata(
                 ...baseMetadata,
                 repository: {
                     url: getRepositoryUrl(skillPath),
+                },
+                installation: {
+                    targetDir: `.claude/skills/${skillName}`,
+                    instructions: plugin.source?.source === 'github'
+                        ? `claude skill add https://github.com/${plugin.source.repo}`
+                        : marketplace.source.type === 'github'
+                        ? `claude skill add https://github.com/${marketplace.source.owner}/${marketplace.source.repo}/tree/${marketplace.source.branch || 'main'}/${skillPath}`
+                        : undefined
                 },
             });
         }
@@ -301,7 +311,7 @@ function extractPluginMetadata(
             const commandName = commandPath.split('/').pop()?.replace('.md', '') || commandPath;
             tools.push({
                 id: commandName,
-                name: commandName.split('-').map((w: string) => 
+                name: commandName.split('-').map((w: string) =>
                     w.charAt(0).toUpperCase() + w.slice(1)
                 ).join(' '),
                 category: 'slash-commands' as ToolCategory,
@@ -310,6 +320,10 @@ function extractPluginMetadata(
                 ...baseMetadata,
                 repository: {
                     url: getRepositoryUrl(commandPath),
+                },
+                installation: {
+                    targetDir: `.claude/commands`,
+                    instructions: undefined
                 },
             });
         }
@@ -321,7 +335,7 @@ function extractPluginMetadata(
             const agentName = agentPath.split('/').pop()?.replace('.md', '') || agentPath;
             tools.push({
                 id: agentName,
-                name: agentName.split('-').map((w: string) => 
+                name: agentName.split('-').map((w: string) =>
                     w.charAt(0).toUpperCase() + w.slice(1)
                 ).join(' '),
                 category: 'agents' as ToolCategory,
@@ -331,6 +345,10 @@ function extractPluginMetadata(
                 repository: {
                     url: getRepositoryUrl(agentPath),
                 },
+                installation: {
+                    targetDir: `.claude/agents`,
+                    instructions: undefined
+                },
             });
         }
     }
@@ -338,17 +356,24 @@ function extractPluginMetadata(
     // If no component arrays, treat as single plugin
     if (tools.length === 0 && plugin.name) {
         const pluginSource = typeof plugin.source === 'string' ? plugin.source : plugin.source?.path || './';
+        const category = (plugin.category || 'plugin') as ToolCategory;
         tools.push({
             id: plugin.name,
-            name: plugin.name.split('-').map((w: string) => 
+            name: plugin.name.split('-').map((w: string) =>
                 w.charAt(0).toUpperCase() + w.slice(1)
             ).join(' '),
-            category: (plugin.category || 'plugin') as ToolCategory,
+            category,
             description: plugin.description || '',
             tags: plugin.tags || plugin.keywords || [],
             ...baseMetadata,
             repository: {
                 url: getRepositoryUrl(pluginSource),
+            },
+            installation: {
+                targetDir: `.claude/${category}/${plugin.name}`,
+                instructions: plugin.source?.source === 'github'
+                    ? `claude ${category === 'skills' ? 'skill' : category === 'agents' ? 'agent' : 'plugin'} add https://github.com/${plugin.source.repo}`
+                    : plugin.installation?.instructions
             },
         });
     }
@@ -872,10 +897,11 @@ async function loadNonPluginTool(tool: NonPluginTool): Promise<ToolWithContent |
 
 /**
  * OPTIMIZED: Load only metadata for non-plugin tools
+ * Includes installation data from the registry
  */
-async function loadNonPluginToolsMetadata(): Promise<Tool[]> {
+async function loadNonPluginToolsMetadata(): Promise<ToolWithInstallation[]> {
     const registryPath = path.join(process.cwd(), 'src/data/tools-registry.json');
-    
+
     let registry: ToolsRegistry;
     try {
         const content = await fs.readFile(registryPath, 'utf-8');
@@ -885,7 +911,7 @@ async function loadNonPluginToolsMetadata(): Promise<Tool[]> {
         return [];
     }
 
-    // Just return the metadata without fetching files
+    // Return metadata with installation data (no file fetching)
     return registry.tools.map(tool => ({
         id: tool.id,
         name: tool.name,
@@ -904,6 +930,11 @@ async function loadNonPluginToolsMetadata(): Promise<Tool[]> {
         },
         repository: {
             url: tool.repository.url,
+        },
+        installation: {
+            isNonPlugin: true,
+            prerequisites: tool.installation.prerequisites,
+            steps: tool.installation.steps
         },
     }));
 }

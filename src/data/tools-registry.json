@@ -29,6 +29,90 @@
         "include": ["README.md", ".claude/**/*"],
         "exclude": [".git/**"]
       }
+    },
+    {
+      "id": "claude-code-documentation",
+      "name": "Claude Code Documentation",
+      "category": "commands",
+      "description": "Local mirror of Claude Code documentation files from https://docs.anthropic.com/en/docs/claude-code/, updated every 3 hours.",
+      "author": "Eric Buess",
+      "version": "1.0.0",
+      "tags": ["Anthropic", "Claude Code", "documentation"],
+      "lastUpdated": "2025-11-21T00:00:00Z",
+      "repository": {
+        "type": "github",
+        "url": "https://github.com/ericbuess/claude-code-docs",
+        "owner": "ericbuess",
+        "repo": "claude-code-docs",
+        "branch": "main"
+      },
+      "installation": {
+        "steps": [
+          {
+            "content": "Run this single command:\n\n```bash\ncurl -fsSL https://raw.githubusercontent.com/ericbuess/claude-code-docs/main/install.sh | bash\n```\n\nThis will:\n1. Install to `~/.claude-code-docs` (or migrate existing installation)\n2. Create the `/docs` slash command to pass arguments to the tool and tell it where to find the docs\n3. Set up a 'PreToolUse' 'Read' hook to enable automatic git pull when reading docs from the ~/.claude-code-docs`"
+          }
+        ]
+      },
+      "files": {
+        "include": ["README.md", "docs/**/*"],
+        "exclude": [".git/**"]
+      }
+    },
+    {
+      "id": "cc-sessions",
+      "name": "cc-sessions",
+      "category": "plugins",
+      "description": "An opinionated approach to produce development with Claude Code.",
+      "author": "GWUDCAP",
+      "version": "1.0.0",
+      "tags": ["Claude Code", "development"],
+      "lastUpdated": "2025-11-21T00:00:00Z",
+      "repository": {
+        "type": "github",
+        "url": "https://github.com/GWUDCAP/cc-sessions",
+        "owner": "GWUDCAP",
+        "repo": "cc-sessions",
+        "branch": "main"
+      },
+      "installation": {
+        "steps": [
+          {
+            "content": "Install cc-sessions into a repo from the project root:\n\n```bash\n[npx|pipx run] cc-sessions\n```\n\nThere are Python and Node packages - use whichever you have."
+          }
+        ]
+      },
+      "files": {
+        "include": ["README.md", "cc_sessions/**/*"],
+        "exclude": [".git/**"]
+      }
+    },
+    {
+      "id": "ccexp",
+      "name": "Claude Code Explorer",
+      "category": "commands",
+      "description": "ccexp (short for claude-code-explorer) is a React Ink-based CLI tool that provides an interactive terminal interface for discovering, previewing, and managing Claude Code configuration files and slash commands. Navigate through your codebase to find CLAUDE.md files, slash command definitions, and other Claude-related configurations with a beautiful terminal UI.",
+      "author": "NakamuraTakumi",
+      "version": "1.0.0",
+      "tags": ["Claude Code", "CLI tool", "management"],
+      "lastUpdated": "2025-11-21T00:00:00Z",
+      "repository": {
+        "type": "github",
+        "url": "https://github.com/nyatinte/ccexp",
+        "owner": "nyatinte",
+        "repo": "ccexp",
+        "branch": "main"
+      },
+      "installation": {
+        "steps": [
+          {
+            "content": "No installation required! Run directly with:\n\n```bash\n# Using Bun (fastest)\nbunx ccexp@latest\n\n# Using npm\nnpx ccexp@latest\n\n# Using pnpm\npnpm dlx ccexp@latest\n```"
+          }
+        ]
+      },
+      "files": {
+        "include": ["README.md", ".claude/**/*"],
+        "exclude": [".git/**"]
+      }
     }
   ]
 }

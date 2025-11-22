@@ -49,11 +49,15 @@ export interface ToolInstallation {
   // For marketplace plugins
   targetDir?: string; // Some categories (e.g., MCP) may only provide an install command
   instructions?: string;
-  
+
   // For non-plugin tools
   isNonPlugin?: boolean;
   prerequisites?: InstallationStep[];
   steps?: InstallationStep[];
+}
+
+export interface ToolWithInstallation extends Tool {
+  installation?: ToolInstallation;
 }
 
 export interface ToolWithContent extends Tool {
