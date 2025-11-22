@@ -32,8 +32,15 @@ export class GitHubFetcher implements MarketplaceFetcher {
      */
     async fetchFile(path: string): Promise<string> {
         const url = `${this.baseUrl}/${path}`;
+        const headers: Record<string, string> = {
+            'User-Agent': 'claudesmith-directory',
+        };
+        if (process.env.GITHUB_TOKEN) {
+            headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+        }
 
         const response = await fetch(url, {
+            headers,
             next: {
                 revalidate: this.cacheRevalidate,
                 tags: [`github:${this.config.owner}/${this.config.repo}`]
