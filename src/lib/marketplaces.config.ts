@@ -8,35 +8,45 @@ export interface MarketplaceConfig {
     source: MarketplaceSource;
     enabled: boolean;
     cacheRevalidate?: number; // Revalidation time in seconds
+    purpose?: string; // Purpose/category of the marketplace (general, nextjs, react, workflow, etc.)
 }
 
 export const MARKETPLACES: MarketplaceConfig[] = [
     {
-        id: 'jnlei-claude-tools',
-        name: 'ClaudeSmith Marketplace',
+        id: 'claudesmith-general',
+        name: 'ClaudeSmith General Tools',
         source: {
-            type: 'local',
-            path: './tools'
+            type: 'github',
+            owner: 'JNLei',
+            repo: 'claude-tools',
+            branch: 'main'
         },
         enabled: true,
+        cacheRevalidate: 3600, // 1 hour
+        purpose: 'general'
     },
     {
         id: 'anthropic-skills',
-        name: 'Anthropic Skills',
+        name: 'Anthropic Official Skills',
         source: {
-            type: 'local',
-            path: './external-marketplaces/anthropic-skills'
+            type: 'github',
+            owner: 'anthropics',
+            repo: 'skills',
+            branch: 'main'
         },
         enabled: true,
+        cacheRevalidate: 7200, // 2 hours
+        purpose: 'skills'
     },
     {
-        id: 'third-party-marketplace',
-        name: 'Third-Party Plugins',
+        id: 'third-party-plugins',
+        name: 'Community Plugins',
         source: {
             type: 'local',
-            path: './third-party'
+            path: 'third-party'
         },
         enabled: true,
-        cacheRevalidate: 14400, // 4 hours - third-party content changes less frequently
+        cacheRevalidate: 3600, // 1 hour
+        purpose: 'community'
     },
 ];
