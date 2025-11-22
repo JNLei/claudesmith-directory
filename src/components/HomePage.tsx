@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ToolWithContent, ToolCategory } from '@/lib/types';
+import { Tool, ToolCategory } from '@/lib/types';
 import ToolCard from '@/components/ToolCard';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import CategoryFilter from '@/components/CategoryFilter';
 
 interface HomePageProps {
-  tools: ToolWithContent[];
+  tools: Tool[];
 }
 
 export default function HomePage({ tools }: HomePageProps) {

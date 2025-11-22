@@ -1,0 +1,26 @@
+{
+    "name": "third-party-marketplace",
+    "owner": {
+        "name": "ClaudeSmith Maintainers"
+    },
+    "metadata": {
+        "description": "Third party plugins collection"
+    },
+    "plugins": [
+        {
+            "name": "skill-codex",
+            "source": {
+                "source": "github",
+                "repo": "skills-directory/skill-codex"
+            },
+            "author": {
+                "name": "klaudworks"
+            },
+            "description": "Enable Claude Code to invoke the Codex CLI (codex exec and session resumes) for automated code analysis, refactoring, and editing workflows.",
+            "category": "skills",
+            "tags": [
+                "codex"
+            ]
+        }
+    ]
+}

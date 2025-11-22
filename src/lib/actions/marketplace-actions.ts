@@ -1,19 +1,21 @@
 'use server';
 
 import { unstable_cache } from 'next/cache';
+import { cache } from 'react';
 import path from 'path';
 import fs from 'fs/promises';
 import { MARKETPLACES, MarketplaceConfig } from '../marketplaces.config';
 import { GitHubFetcher } from '../fetchers/github-fetcher';
 import { LocalFetcher } from '../fetchers/local-fetcher';
 import { NonPluginToolFetcher } from '../fetchers/non-plugin-fetcher';
-import { ToolWithContent } from '../types';
+import { Tool, ToolWithContent, ToolCategory } from '../types';
 import type { MarketplaceFetcher } from '../fetchers/marketplace-fetcher.interface';
 import type { NonPluginTool, ToolsRegistry } from '../schemas/tools-registry.schema';
 
 /**
  * Load all tools from all enabled marketplaces and non-plugin registry
  * Cached with Next.js unstable_cache
+ * @deprecated Use loadAllToolsMetadata for listing and loadToolContent for details
  */
 export const loadAllTools = unstable_cache(
     async (): Promise<ToolWithContent[]> => {
@@ -51,6 +53,91 @@ export const loadAllTools = unstable_cache(
 );
 
 /**
+ * OPTIMIZED: Load only metadata for all tools (without fetching file contents)
+ * This is used for the listing page
+ */
+export const loadAllToolsMetadata = unstable_cache(
+    async (): Promise<Tool[]> => {
+        const allTools: Tool[] = [];
+
+        // Load marketplace plugins metadata
+        for (const marketplace of MARKETPLACES) {
+            if (!marketplace.enabled) continue;
+
+            try {
+                const tools = await loadMarketplaceMetadata(marketplace);
+                allTools.push(...tools);
+                console.log(`✓ Loaded metadata for ${tools.length} tools from ${marketplace.name}`);
+            } catch (error) {
+                console.error(`✗ Failed to load marketplace metadata: ${marketplace.name}`, error);
+            }
+        }
+
+        // Load non-plugin tools metadata
+        try {
+            const nonPluginTools = await loadNonPluginToolsMetadata();
+            allTools.push(...nonPluginTools);
+            console.log(`✓ Loaded metadata for ${nonPluginTools.length} non-plugin tools`);
+        } catch (error) {
+            console.error(`✗ Failed to load non-plugin tools metadata:`, error);
+        }
+
+        return allTools;
+    },
+    ['all-tools-metadata'],
+    {
+        revalidate: 3600,
+        tags: ['all-tools-metadata']
+    }
+);
+
+/**
+ * OPTIMIZED: Load a single tool with full content
+ * This is used for the detail page
+ * 
+ * Caching strategy:
+ * 1. React cache() - Deduplicates within a single request (both components can call this)
+ * 2. unstable_cache - Caches across requests for 1 hour
+ */
+export const loadToolContent = cache(
+    async (category: string, id: string): Promise<ToolWithContent | null> => {
+        // Use unstable_cache for cross-request caching
+        const getCachedTool = unstable_cache(
+            async () => {
+                // Try each marketplace
+                for (const marketplace of MARKETPLACES) {
+                    if (!marketplace.enabled) continue;
+
+                    try {
+                        const tool = await loadSingleTool(marketplace, category, id);
+                        if (tool) return tool;
+                    } catch (error) {
+                        console.warn(`Failed to load tool ${category}/${id} from ${marketplace.name}:`, error);
+                    }
+                }
+
+                // Try non-plugin registry
+                try {
+                    const tool = await loadSingleNonPluginTool(id);
+                    if (tool) return tool;
+                } catch (error) {
+                    console.warn(`Failed to load non-plugin tool ${id}:`, error);
+                }
+
+                return null;
+            },
+            [`tool-${category}-${id}`], // Unique cache key per tool
+            {
+                revalidate: 3600, // 1 hour
+                tags: [`tool-${category}-${id}`, 'tool-content']
+            }
+        );
+
+        return getCachedTool();
+    }
+);
+
+/**
  * Load tools from a single marketplace
  */
 async function loadMarketplaceTools(
@@ -81,6 +168,189 @@ async function loadMarketplaceTools(
             marketplaceData
         );
         tools.push(...pluginTools);
+    }
+
+    return tools;
+}
+
+/**
+ * OPTIMIZED: Load only metadata from a marketplace (no file fetching)
+ */
+async function loadMarketplaceMetadata(
+    marketplace: MarketplaceConfig
+): Promise<Tool[]> {
+    // Create appropriate fetcher
+    const fetcher = marketplace.source.type === 'local'
+        ? new LocalFetcher(marketplace.source.path)
+        : new GitHubFetcher({
+            owner: marketplace.source.owner,
+            repo: marketplace.source.repo,
+            branch: marketplace.source.branch,
+            cacheRevalidate: marketplace.cacheRevalidate
+        });
+
+    // Fetch marketplace.json only
+    const marketplaceData = await fetcher.fetchMarketplace();
+
+    // Extract metadata from each plugin
+    const tools: Tool[] = [];
+
+    for (const plugin of marketplaceData.plugins) {
+        const pluginMetadata = extractPluginMetadata(plugin, marketplace, marketplaceData);
+        tools.push(...pluginMetadata);
+    }
+
+    return tools;
+}
+
+/**
+ * OPTIMIZED: Load a single tool with full content from a marketplace
+ */
+async function loadSingleTool(
+    marketplace: MarketplaceConfig,
+    category: string,
+    id: string
+): Promise<ToolWithContent | null> {
+    // Create appropriate fetcher
+    const fetcher = marketplace.source.type === 'local'
+        ? new LocalFetcher(marketplace.source.path)
+        : new GitHubFetcher({
+            owner: marketplace.source.owner,
+            repo: marketplace.source.repo,
+            branch: marketplace.source.branch,
+            cacheRevalidate: marketplace.cacheRevalidate
+        });
+
+    // Fetch marketplace.json
+    const marketplaceData = await fetcher.fetchMarketplace();
+
+    // Find the plugin that contains this tool
+    for (const plugin of marketplaceData.plugins) {
+        const pluginTools = await loadPlugin(plugin, fetcher, marketplace, marketplaceData);
+        const tool = pluginTools.find(t => t.category === category && t.id === id);
+        if (tool) return tool;
+    }
+
+    return null;
+}
+
+/**
+ * Extract metadata from a plugin definition (without fetching files)
+ */
+function extractPluginMetadata(
+    plugin: any,
+    marketplace: MarketplaceConfig,
+    marketplaceData: any
+): Tool[] {
+    const tools: Tool[] = [];
+    
+    // Generate repository URL helper
+    const getRepositoryUrl = (itemPath?: string): string | undefined => {
+        // Check if plugin has its own GitHub source
+        if (plugin.source?.source === 'github') {
+            const repoUrl = `https://github.com/${plugin.source.repo}`;
+            return itemPath ? `${repoUrl}/tree/${plugin.source.branch || 'main'}/${itemPath}` : repoUrl;
+        }
+        
+        // Use marketplace source
+        if (marketplace.source.type === 'github') {
+            const branch = marketplace.source.branch || 'main';
+            const repoUrl = `https://github.com/${marketplace.source.owner}/${marketplace.source.repo}`;
+            return itemPath ? `${repoUrl}/tree/${branch}/${itemPath}` : repoUrl;
+        }
+        
+        return undefined;
+    };
+    
+    const baseMetadata = {
+        author: plugin.author?.name || marketplaceData.owner.name,
+        version: plugin.version || '1.0.0',
+        downloads: 0,
+        rating: 5,
+        lastUpdated: new Date().toISOString(),
+        featured: plugin.featured || false,
+        marketplace: {
+            id: marketplace.id,
+            name: marketplace.name,
+        },
+    };
+
+    // Extract skills
+    if (plugin.skills && plugin.skills.length > 0) {
+        for (const skillPath of plugin.skills) {
+            const skillName = skillPath.split('/').pop() || skillPath;
+            tools.push({
+                id: skillName,
+                name: skillName.split('-').map((w: string) => 
+                    w.charAt(0).toUpperCase() + w.slice(1)
+                ).join(' '),
+                category: 'skills' as ToolCategory,
+                description: plugin.description || `Skill: ${skillName}`,
+                tags: plugin.tags || plugin.keywords || [skillName],
+                ...baseMetadata,
+                repository: {
+                    url: getRepositoryUrl(skillPath),
+                },
+            });
+        }
+    }
+
+    // Extract commands
+    if (plugin.commands && plugin.commands.length > 0) {
+        for (const commandPath of plugin.commands) {
+            const commandName = commandPath.split('/').pop()?.replace('.md', '') || commandPath;
+            tools.push({
+                id: commandName,
+                name: commandName.split('-').map((w: string) => 
+                    w.charAt(0).toUpperCase() + w.slice(1)
+                ).join(' '),
+                category: 'slash-commands' as ToolCategory,
+                description: plugin.description || `Command: ${commandName}`,
+                tags: plugin.tags || plugin.keywords || [commandName],
+                ...baseMetadata,
+                repository: {
+                    url: getRepositoryUrl(commandPath),
+                },
+            });
+        }
+    }
+
+    // Extract agents
+    if (plugin.agents && plugin.agents.length > 0) {
+        for (const agentPath of plugin.agents) {
+            const agentName = agentPath.split('/').pop()?.replace('.md', '') || agentPath;
+            tools.push({
+                id: agentName,
+                name: agentName.split('-').map((w: string) => 
+                    w.charAt(0).toUpperCase() + w.slice(1)
+                ).join(' '),
+                category: 'agents' as ToolCategory,
+                description: plugin.description || `Agent: ${agentName}`,
+                tags: plugin.tags || plugin.keywords || [agentName],
+                ...baseMetadata,
+                repository: {
+                    url: getRepositoryUrl(agentPath),
+                },
+            });
+        }
+    }
+
+    // If no component arrays, treat as single plugin
+    if (tools.length === 0 && plugin.name) {
+        const pluginSource = typeof plugin.source === 'string' ? plugin.source : plugin.source?.path || './';
+        tools.push({
+            id: plugin.name,
+            name: plugin.name.split('-').map((w: string) => 
+                w.charAt(0).toUpperCase() + w.slice(1)
+            ).join(' '),
+            category: (plugin.category || 'plugin') as ToolCategory,
+            description: plugin.description || '',
+            tags: plugin.tags || plugin.keywords || [],
+            ...baseMetadata,
+            repository: {
+                url: getRepositoryUrl(pluginSource),
+            },
+        });
     }
 
     return tools;
@@ -598,4 +868,63 @@ async function loadNonPluginTool(tool: NonPluginTool): Promise<ToolWithContent |
             name: 'Community Tools'
         }
     };
+}
+
+/**
+ * OPTIMIZED: Load only metadata for non-plugin tools
+ */
+async function loadNonPluginToolsMetadata(): Promise<Tool[]> {
+    const registryPath = path.join(process.cwd(), 'src/data/tools-registry.json');
+    
+    let registry: ToolsRegistry;
+    try {
+        const content = await fs.readFile(registryPath, 'utf-8');
+        registry = JSON.parse(content);
+    } catch (error) {
+        console.warn('Could not load tools-registry.json:', error);
+        return [];
+    }
+
+    // Just return the metadata without fetching files
+    return registry.tools.map(tool => ({
+        id: tool.id,
+        name: tool.name,
+        category: tool.category,
+        description: tool.description,
+        author: tool.author,
+        version: tool.version,
+        tags: tool.tags,
+        downloads: 0,
+        rating: 5,
+        lastUpdated: tool.lastUpdated,
+        featured: tool.featured,
+        marketplace: {
+            id: 'non-plugin-registry',
+            name: 'Community Tools',
+        },
+        repository: {
+            url: tool.repository.url,
+        },
+    }));
+}
+
+/**
+ * OPTIMIZED: Load a single non-plugin tool with full content
+ */
+async function loadSingleNonPluginTool(id: string): Promise<ToolWithContent | null> {
+    const registryPath = path.join(process.cwd(), 'src/data/tools-registry.json');
+    
+    let registry: ToolsRegistry;
+    try {
+        const content = await fs.readFile(registryPath, 'utf-8');
+        registry = JSON.parse(content);
+    } catch (error) {
+        console.warn('Could not load tools-registry.json:', error);
+        return null;
+    }
+
+    const tool = registry.tools.find(t => t.id === id);
+    if (!tool) return null;
+
+    return loadNonPluginTool(tool);
 }

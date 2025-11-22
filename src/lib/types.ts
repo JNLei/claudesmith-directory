@@ -12,6 +12,13 @@ export interface Tool {
   rating: number;
   lastUpdated: string;
   featured?: boolean;
+  marketplace: {
+    id: string;
+    name: string;
+  };
+  repository?: {
+    url?: string;
+  };
 }
 
 export interface HookConfig {

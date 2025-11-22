@@ -21,12 +21,12 @@
       "installation": {
         "steps": [
           {
-            "content": "Run this command in your terminal to install the AB Method workflow:\n\n```bash\ncurl -fsSL https://raw.githubusercontent.com/ayoubben18/ab-method/refs/heads/main/install.sh | bash\n```\n\nThis will automatically set up the AB Method in your `.claude` directory."
+            "content": "Install AB Method in your project with a single command:\n\n```bash\nnpx ab-method\n```\n\nThis will automatically set up the AB Method in your `.claude` directory."
           }
         ]
       },
       "files": {
-        "include": ["README.md", "install.sh", ".claude/**/*"],
+        "include": ["README.md", ".claude/**/*"],
         "exclude": [".git/**"]
       }
     }

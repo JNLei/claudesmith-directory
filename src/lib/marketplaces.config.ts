@@ -42,10 +42,8 @@ export const MARKETPLACES: MarketplaceConfig[] = [
         id: 'third-party-plugins',
         name: 'Community Plugins',
         source: {
-            type: 'github',
-            owner: 'JNLei',
-            repo: 'third-party-claude-plugins',
-            branch: 'main'
+            type: 'local',
+            path: 'third-party'
         },
         enabled: true,
         cacheRevalidate: 3600, // 1 hour
