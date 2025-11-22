@@ -9,7 +9,11 @@
       "description": "Simple command to add AB method workflow to Claude Code",
       "author": "ayoubben18",
       "version": "1.0.0",
-      "tags": ["workflow", "method", "productivity"],
+      "tags": [
+        "workflow",
+        "method",
+        "productivity"
+      ],
       "lastUpdated": "2025-11-21T00:00:00Z",
       "repository": {
         "type": "github",
@@ -26,8 +30,13 @@
         ]
       },
       "files": {
-        "include": ["README.md", ".claude/**/*"],
-        "exclude": [".git/**"]
+        "include": [
+          "README.md",
+          ".claude/**/*"
+        ],
+        "exclude": [
+          ".git/**"
+        ]
       }
     },
     {
@@ -37,7 +46,11 @@
       "description": "Local mirror of Claude Code documentation files from https://docs.anthropic.com/en/docs/claude-code/, updated every 3 hours.",
       "author": "Eric Buess",
       "version": "1.0.0",
-      "tags": ["Anthropic", "Claude Code", "documentation"],
+      "tags": [
+        "Anthropic",
+        "Claude Code",
+        "documentation"
+      ],
       "lastUpdated": "2025-11-21T00:00:00Z",
       "repository": {
         "type": "github",
@@ -54,8 +67,13 @@
         ]
       },
       "files": {
-        "include": ["README.md", "docs/**/*"],
-        "exclude": [".git/**"]
+        "include": [
+          "README.md",
+          "docs/**/*"
+        ],
+        "exclude": [
+          ".git/**"
+        ]
       }
     },
     {
@@ -65,7 +83,10 @@
       "description": "An opinionated approach to produce development with Claude Code.",
       "author": "GWUDCAP",
       "version": "1.0.0",
-      "tags": ["Claude Code", "development"],
+      "tags": [
+        "Claude Code",
+        "development"
+      ],
       "lastUpdated": "2025-11-21T00:00:00Z",
       "repository": {
         "type": "github",
@@ -82,8 +103,13 @@
         ]
       },
       "files": {
-        "include": ["README.md", "cc_sessions/**/*"],
-        "exclude": [".git/**"]
+        "include": [
+          "README.md",
+          "cc_sessions/**/*"
+        ],
+        "exclude": [
+          ".git/**"
+        ]
       }
     },
     {
@@ -93,7 +119,11 @@
       "description": "ccexp (short for claude-code-explorer) is a React Ink-based CLI tool that provides an interactive terminal interface for discovering, previewing, and managing Claude Code configuration files and slash commands. Navigate through your codebase to find CLAUDE.md files, slash command definitions, and other Claude-related configurations with a beautiful terminal UI.",
       "author": "NakamuraTakumi",
       "version": "1.0.0",
-      "tags": ["Claude Code", "CLI tool", "management"],
+      "tags": [
+        "Claude Code",
+        "CLI tool",
+        "management"
+      ],
       "lastUpdated": "2025-11-21T00:00:00Z",
       "repository": {
         "type": "github",
@@ -110,11 +140,14 @@
         ]
       },
       "files": {
-        "include": ["README.md", ".claude/**/*"],
-        "exclude": [".git/**"]
+        "include": [
+          "README.md",
+          ".claude/**/*"
+        ],
+        "exclude": [
+          ".git/**"
+        ]
       }
     }
   ]
 }
-
-

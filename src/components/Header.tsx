@@ -37,23 +37,30 @@ export default function Header() {
           <nav className="flex items-center gap-6">
             <a
               href="/"
-              className={`text-sm font-medium transition-colors ${
-                isToolsPage
+              className={`text-sm font-medium transition-colors ${isToolsPage
                   ? 'text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             >
               Tools
             </a>
             <a
               href="/blog"
-              className={`text-sm font-medium transition-colors ${
-                isBlogPage
+              className={`text-sm font-medium transition-colors ${isBlogPage
                   ? 'text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             >
               Blog
+            </a>
+            <a
+              href="/submit"
+              className={`text-sm font-medium transition-colors ${pathname === '/submit'
+                  ? 'text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+                }`}
+            >
+              Submit
             </a>
           </nav>
         </div>
