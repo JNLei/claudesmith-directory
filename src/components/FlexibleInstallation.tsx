@@ -88,31 +88,31 @@ function InstallationStep({ step, index, showStepNumber }: InstallationStepProps
         <div className="prose prose-sm max-w-none dark:prose-invert">
           <ReactMarkdown
             components={{
-              code({ node, inline, className, children, ...props }) {
+              code(props) {
+                const { children, className, ...rest } = props;
                 const match = /language-(\w+)/.exec(className || '');
                 const codeContent = String(children).replace(/\n$/, '');
-                
-                if (!inline && match) {
+
+                if (match) {
                   return (
                     <div className="relative group">
                       <div className="absolute right-2 top-2 z-10">
                         <CopyButton content={codeContent} label="Copy" />
                       </div>
                       <SyntaxHighlighter
-                        style={oneDark}
+                        style={oneDark as any}
                         language={match[1]}
                         PreTag="div"
                         className="rounded-lg !mt-0"
-                        {...props}
                       >
                         {codeContent}
                       </SyntaxHighlighter>
                     </div>
                   );
                 }
-                
+
                 return (
-                  <code className="px-1.5 py-0.5 rounded bg-muted text-sm font-mono" {...props}>
+                  <code className="px-1.5 py-0.5 rounded bg-muted text-sm font-mono" {...rest}>
                     {children}
                   </code>
                 );
