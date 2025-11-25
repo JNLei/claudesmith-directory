@@ -9,7 +9,11 @@
       "description": "Simple command to add AB method workflow to Claude Code",
       "author": "ayoubben18",
       "version": "1.0.0",
-      "tags": ["workflow", "method", "productivity"],
+      "tags": [
+        "workflow",
+        "method",
+        "productivity"
+      ],
       "lastUpdated": "2025-11-21T00:00:00Z",
       "repository": {
         "type": "github",
@@ -26,8 +30,13 @@
         ]
       },
       "files": {
-        "include": ["README.md", ".claude/**/*"],
-        "exclude": [".git/**"]
+        "include": [
+          "README.md",
+          ".claude/**/*"
+        ],
+        "exclude": [
+          ".git/**"
+        ]
       }
     },
     {
@@ -37,7 +46,11 @@
       "description": "Local mirror of Claude Code documentation files from https://docs.anthropic.com/en/docs/claude-code/, updated every 3 hours.",
       "author": "Eric Buess",
       "version": "1.0.0",
-      "tags": ["Anthropic", "Claude Code", "documentation"],
+      "tags": [
+        "Anthropic",
+        "Claude Code",
+        "documentation"
+      ],
       "lastUpdated": "2025-11-21T00:00:00Z",
       "repository": {
         "type": "github",
@@ -54,8 +67,13 @@
         ]
       },
       "files": {
-        "include": ["README.md", "docs/**/*"],
-        "exclude": [".git/**"]
+        "include": [
+          "README.md",
+          "docs/**/*"
+        ],
+        "exclude": [
+          ".git/**"
+        ]
       }
     },
     {
@@ -65,7 +83,10 @@
       "description": "An opinionated approach to produce development with Claude Code.",
       "author": "GWUDCAP",
       "version": "1.0.0",
-      "tags": ["Claude Code", "development"],
+      "tags": [
+        "Claude Code",
+        "development"
+      ],
       "lastUpdated": "2025-11-21T00:00:00Z",
       "repository": {
         "type": "github",
@@ -82,8 +103,13 @@
         ]
       },
       "files": {
-        "include": ["README.md", "cc_sessions/**/*"],
-        "exclude": [".git/**"]
+        "include": [
+          "README.md",
+          "cc_sessions/**/*"
+        ],
+        "exclude": [
+          ".git/**"
+        ]
       }
     },
     {
@@ -93,7 +119,11 @@
       "description": "ccexp (short for claude-code-explorer) is a React Ink-based CLI tool that provides an interactive terminal interface for discovering, previewing, and managing Claude Code configuration files and slash commands. Navigate through your codebase to find CLAUDE.md files, slash command definitions, and other Claude-related configurations with a beautiful terminal UI.",
       "author": "NakamuraTakumi",
       "version": "1.0.0",
-      "tags": ["Claude Code", "CLI tool", "management"],
+      "tags": [
+        "Claude Code",
+        "CLI tool",
+        "management"
+      ],
       "lastUpdated": "2025-11-21T00:00:00Z",
       "repository": {
         "type": "github",
@@ -110,11 +140,131 @@
         ]
       },
       "files": {
-        "include": ["README.md", ".claude/**/*"],
-        "exclude": [".git/**"]
+        "include": [
+          "README.md",
+          ".claude/**/*"
+        ],
+        "exclude": [
+          ".git/**"
+        ]
+      }
+    },
+    {
+      "id": "cchistory",
+      "name": "Claude Code History",
+      "category": "commands",
+      "description": "Like the shell history command but for your Claude Code sessions. Easily list all Bash or Bash-mode (!) commands Claude Code ran in a session for reference.",
+      "author": "Stephan Eckardt",
+      "version": "1.0.0",
+      "tags": [
+        "Claude Code",
+        "CLI tool",
+        "management"
+      ],
+      "lastUpdated": "2025-11-21T00:00:00Z",
+      "repository": {
+        "type": "github",
+        "url": "https://github.com/eckardt/cchistory",
+        "owner": "eckardt",
+        "repo": "cchistory",
+        "branch": "main"
+      },
+      "installation": {
+        "steps": [
+          {
+            "content": "npm (recommended)\n\n```bash\nnpm install -g cchistory\n```\n\nnpx (try without installing):\n\n```bash\nnpx cchistory\n```"
+          }
+        ]
+      },
+      "files": {
+        "include": [
+          "README.md",
+          "package.json",
+          "bin/**/*",
+          "src/**/*"
+        ],
+        "exclude": [
+          ".git/**"
+        ]
+      }
+    },
+    {
+      "id": "cclogviewer",
+      "name": "Claude Code Log Viewer",
+      "category": "commands",
+      "description": "A humble but handy utility for viewing Claude Code .jsonl conversation files in a pretty HTML UI.",
+      "author": "Brad S.",
+      "version": "1.0.0",
+      "tags": [
+        "Claude Code",
+        "CLI tool",
+        "management"
+      ],
+      "lastUpdated": "2025-11-21T00:00:00Z",
+      "repository": {
+        "type": "github",
+        "url": "https://github.com/Brads3290/cclogviewer",
+        "owner": "Brads3290",
+        "repo": "cclogviewer",
+        "branch": "main"
+      },
+      "installation": {
+        "steps": [
+          {
+            "content": "Requires Go 1.21 or later. Install Go from https://go.dev/\n\n```bash\ngit clone https://github.com/brads3290/cclogviewer\ncd cclogviewer\nmake build\n```\n\nOr install directly:\n\n```bash\ngo install github.com/brads3290/cclogviewer/cmd/cclogviewer@latest\n```"
+          }
+        ]
+      },
+      "files": {
+        "include": [
+          "README.md",
+          "go.mod",
+          "internal/**/*",
+          "claude/**/*"
+        ],
+        "exclude": [
+          ".git/**"
+        ]
+      }
+    },
+    {
+      "id": "rulesync",
+      "name": "Rule Sync",
+      "category": "commands",
+      "description": "A Node.js CLI tool that automatically generates configs (rules, ignore files, MCP servers, commands, and subagents) for various AI coding agents. Rulesync can convert configs between Claude Code and other AI agents in both directions.",
+      "author": "dyoshikawa",
+      "version": "1.0.0",
+      "tags": [
+        "Claude Code",
+        "CLI tool",
+        "management"
+      ],
+      "lastUpdated": "2025-11-21T00:00:00Z",
+      "repository": {
+        "type": "github",
+        "url": "https://github.com/Brads3290/cclogviewer",
+        "owner": "Brads3290",
+        "repo": "cclogviewer",
+        "branch": "main"
+      },
+      "installation": {
+        "steps": [
+          {
+            "content": "Package Managers\n\n```bash\nnpm install -g rulesync\n# or\nbrew install rulesync\n# And then\nrulesync --version\nrulesync --help\n```"
+          }
+        ]
+      },
+      "files": {
+        "include": [
+          "README.md",
+          "package.json",
+          "src/**/*",
+          ".claude/**/*"
+        ],
+        "exclude": [
+          ".git/**"
+        ]
       }
     }
   ]
 }
-
-
