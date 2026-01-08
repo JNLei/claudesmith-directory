@@ -1,4 +1,3 @@
-import { unstable_cache } from 'next/cache';
 import { MarketplaceFetcher } from './marketplace-fetcher.interface';
 
 export interface GitHubFetcherConfig {

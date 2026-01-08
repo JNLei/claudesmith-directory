@@ -12,7 +12,20 @@
       "Bash(npx create-next-app:*)",
       "Skill(frontend-development)",
       "Bash(chmod:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(npm run build:*)",
+      "Bash(echo:*)",
+      "Bash(curl:*)",
+      "Bash(rm:*)",
+      "Bash(node -e \"\nconst fetch = globalThis.fetch || require\\(''node-fetch''\\);\nconst url = ''https://raw.githubusercontent.com/JNLei/claude-tools/main/.claude-plugin/marketplace.json'';\nfetch\\(url, {\n  headers: {\n    ''User-Agent'': ''claudesmith-directory''\n  }\n}\\).then\\(res => {\n  console.log\\(''Status:'', res.status\\);\n  console.log\\(''StatusText:'', res.statusText\\);\n  return res.text\\(\\);\n}\\).then\\(text => {\n  console.log\\(''Body length:'', text.length\\);\n  console.log\\(''First 100 chars:'', text.substring\\(0, 100\\)\\);\n}\\).catch\\(err => console.error\\(''Error:'', err.message\\)\\);\n\")",
+      "Bash(done)",
+      "Bash(cat:*)",
+      "Bash(timeout 20 sh -c 'npm run dev 2>&1 &\nsleep 10\ncurl -s \"\"http://localhost:3000/api/test-fetch\"\" 2>/dev/null || curl -s \"\"http://localhost:3000\"\" 2>/dev/null | head -c 200\npkill -f \"\"next dev\"\" 2>/dev/null')",
+      "Bash(node -e:*)",
+      "Bash(node --version:*)",
+      "Bash(npm ls:*)"
     ],
     "deny": [],
     "ask": []
